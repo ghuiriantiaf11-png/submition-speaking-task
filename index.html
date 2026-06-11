@@ -1,128 +1,105 @@
 
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>About My Family - Writing Exercise</title>
-
-<style>
-body{
-    font-family: Arial, sans-serif;
-    max-width: 900px;
-    margin: auto;
-    padding: 20px;
-    background:#f4f6f9;
-}
-
-.container{
-    background:white;
-    padding:25px;
-    border-radius:10px;
-    box-shadow:0 0 10px rgba(0,0,0,.1);
-}
-
-h1,h2{
-    color:#2c3e50;
-}
-
-textarea{
-    width:100%;
-    min-height:120px;
-    padding:10px;
-    margin-top:10px;
-}
-
-input{
-    padding:8px;
-    margin:5px;
-}
-
-button{
-    background:#3498db;
-    color:white;
-    border:none;
-    padding:12px 20px;
-    border-radius:5px;
-    cursor:pointer;
-}
-
-button:hover{
-    background:#2980b9;
-}
-
-.correct{
-    color:green;
-    font-weight:bold;
-}
-
-.wrong{
-    color:red;
-    font-weight:bold;
-}
-</style>
+  <meta charset="UTF-8">
+  <title>Speaking Recording Task</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 25px;
+      background: #f5f5f5;
+      text-align: center;
+    }
+    .box {
+      background: white;
+      padding: 25px;
+      border-radius: 15px;
+      max-width: 600px;
+      margin: auto;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    button {
+      padding: 12px 20px;
+      margin: 8px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    #start { background: #2e7d32; color: white; }
+    #stop { background: #c62828; color: white; }
+    #download { background: #1565c0; color: white; }
+    audio {
+      margin-top: 20px;
+      width: 100%;
+    }
+  </style>
 </head>
 <body>
 
-<div class="container">
+  <div class="box">
+    <h2>Speaking Task</h2>
 
-<hr>
+    <p><b>Record a 1–2 minute speech about:</b></p>
+    <h3>"The Importance of Safety Equipment in the Workplace"</h3>
 
-<h2>Part A: Fill in the blanks</h2>
+    <p>Mention at least 3 safety equipment, their functions, and why workers should use them.</p>
 
-<p>1. Kelly lives in
-<input id="q1"></p>
+    <button id="start">Start Recording</button>
+    <button id="stop" disabled>Stop Recording</button>
 
-<p>2. Kelly's mother's name is
-<input id="q2"></p>
+    <br>
 
-<p>3. Kelly's father works in a
-<input id="q3"></p>
+    <audio id="audio" controls></audio>
 
-<p>4. Kelly's sister loves listening to
-<input id="q4"></p>
+    <br>
 
-<p>5. Brandy is a pet
-<input id="q5"></p>
+    <a id="download" style="display:none;" download="speaking-recording.webm">
+      <button>Download Recording</button>
+    </a>
+  </div>
 
-<button onclick="checkAnswers()">Check Answers</button>
+  <script>
+    let mediaRecorder;
+    let audioChunks = [];
 
-<p id="result"></p>
+    const startBtn = document.getElementById("start");
+    const stopBtn = document.getElementById("stop");
+    const audio = document.getElementById("audio");
+    const downloadLink = document.getElementById("download");
 
-<hr>
+    startBtn.onclick = async () => {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
-<h2>Part B: Write About Your Family</h2>
+      mediaRecorder = new MediaRecorder(stream);
+      audioChunks = [];
 
-<p>Write 5–8 sentences about your family.</p>
+      mediaRecorder.ondataavailable = event => {
+        audioChunks.push(event.data);
+      };
 
-<textarea placeholder="My name is..."></textarea>
+      mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
+        const audioUrl = URL.createObjectURL(audioBlob);
 
-</div>
+        audio.src = audioUrl;
+        downloadLink.href = audioUrl;
+        downloadLink.style.display = "inline-block";
+      };
 
-<script>
-function checkAnswers(){
+      mediaRecorder.start();
 
-let score = 0;
+      startBtn.disabled = true;
+      stopBtn.disabled = false;
+    };
 
-const answers = {
-q1:"california",
-q2:"carmen",
-q3:"bank",
-q4:"music",
-q5:"dog"
-};
+    stopBtn.onclick = () => {
+      mediaRecorder.stop();
 
-for(let id in answers){
-let user = document.getElementById(id).value.trim().toLowerCase();
-
-if(user === answers[id]){
-score++;
-}
-}
-
-document.getElementById("result").innerHTML =
-"You got " + score + " out of 5 correct!";
-}
-</script>
+      startBtn.disabled = false;
+      stopBtn.disabled = true;
+    };
+  </script>
 
 </body>
 </html>
